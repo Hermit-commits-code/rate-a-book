@@ -1,7 +1,8 @@
 import * as ImagePicker from "expo-image-picker";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Image, ScrollView, View } from "react-native";
 import { Appbar, Button, Chip, Menu, TextInput } from "react-native-paper";
+import { addBook, initDatabase } from "../../hooks/useDatabase";
 
 export default function AddBookScreen() {
   // State for image picker
@@ -35,7 +36,31 @@ export default function AddBookScreen() {
       setImage(result.assets[0].uri);
     }
   };
+  useEffect(() => {
+    (async () => {
+      await initDatabase();
+    })();
+  }, []);
 
+  const handleSubmit = async () => {
+    await addBook(
+      {
+        photo: image ?? "",
+        description,
+        rating: rating ?? 0,
+        tags,
+        category,
+      },
+      () => {
+        alert("Book saved!");
+        setImage(null);
+        setDescription("");
+        setRating(null);
+        setTags([]);
+        setCategory("");
+      }
+    );
+  };
   return (
     <ScrollView>
       <Appbar.Header>
@@ -127,6 +152,13 @@ export default function AddBookScreen() {
             />
           ))}
         </Menu>
+        <Button
+          mode="contained"
+          onPress={handleSubmit}
+          style={{ marginTop: 24 }}
+        >
+          Save Book
+        </Button>
       </View>
     </ScrollView>
   );

@@ -4,12 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-- Initial project roadmap and planning
-- Scaffolded Expo React Native project
-- Installed React Native Paper for UI
-- Set up navigation with Expo Router (Home, Add Book, Search tabs)
-- Added custom tab icons
-- Implemented Add Book screen with photo picker
-- Added form fields: description, rating, tags, category
-- Integrated React Native Paper Provider for UI components
-- Discussed future features: local storage, search/filter, multi-category support
+- Project scaffolded with Expo and React Native Paper
+- Navigation set up with Expo Router: Home, Add Book, Saved Books, Search tabs
+- Custom tab bar icons using MaterialCommunityIcons for full compatibility
+- Add Book screen: photo picker, description, rating, tags, category
+- Local data storage implemented with SQLite (expo-sqlite async API)
+- Saved Books tab displays all saved books from database
+- Improved UI/UX: spacing, error handling, and form reset
+- Removed unused tabs and icons, cleaned up navigation
+- All tab icons now use MaterialCommunityIcons: home, book-plus, bookshelf, magnify
+- CHANGELOG.md updated for clarity and completeness
