@@ -38,9 +38,9 @@ export default function SavedBooksScreen() {
   const renderBook = ({ item }: { item: any }) => (
     <View style={styles.modernBookCard}>
       <View style={styles.bookImageWrapper}>
-        {item.image ? (
+        {item.photo || item.image ? (
           <Image
-            source={{ uri: item.image }}
+            source={{ uri: item.photo || item.image }}
             style={styles.modernBookImage}
             resizeMode="cover"
             accessibilityLabel={`Cover image for ${item.title}`}
