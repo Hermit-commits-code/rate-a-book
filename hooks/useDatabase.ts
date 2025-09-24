@@ -1,13 +1,22 @@
 import * as SQLite from "expo-sqlite";
+export async function deleteBook(bookId: number) {
+  if (!db) return;
+  await db.runAsync("DELETE FROM books WHERE id = ?;", bookId);
+}
 export async function getBooks(): Promise<any[]> {
   if (!db) {
     return [];
   }
   const result = await db.getAllAsync("SELECT * FROM books;");
-  // Parse tags from JSON string to array
+  // Parse tags and genres from JSON string to array
   return result.map((row: any) => ({
     ...row,
     tags: row.tags ? JSON.parse(row.tags) : [],
+    genres: row.genres
+      ? JSON.parse(row.genres)
+      : row.category
+      ? [row.category]
+      : [],
   }));
 }
 
@@ -22,9 +31,20 @@ export async function initDatabase() {
       description TEXT,
       rating INTEGER,
       tags TEXT,
-      category TEXT
+      category TEXT,
+      genres TEXT
     );
   `);
+  // Migration: If genres column doesn't exist, add it
+  const columns = await db.getAllAsync("PRAGMA table_info(books);");
+  const hasGenres = columns.some((col: any) => col.name === "genres");
+  if (!hasGenres) {
+    await db.execAsync("ALTER TABLE books ADD COLUMN genres TEXT;");
+    // Migrate existing books: set genres to [category] for each book
+    await db.execAsync(
+      "UPDATE books SET genres = json_array(category) WHERE category IS NOT NULL;"
+    );
+  }
 }
 
 export async function addBook(
@@ -34,17 +54,21 @@ export async function addBook(
     rating: number;
     tags: string[];
     category: string;
+    genres: string[];
   },
   callback?: () => void
 ) {
   if (!db) return;
   await db.runAsync(
-    `INSERT INTO books (photo, description, rating, tags, category) VALUES (?, ?, ?, ?, ?);`,
+    `INSERT INTO books (photo, description, rating, tags, category, genres) VALUES (?, ?, ?, ?, ?, ?);`,
     book.photo,
     book.description,
     book.rating,
     JSON.stringify(book.tags),
-    book.category
+    book.category,
+    JSON.stringify(
+      book.genres && book.genres.length ? book.genres : [book.category]
+    )
   );
   if (callback) callback();
 }
