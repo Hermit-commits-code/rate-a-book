@@ -127,6 +127,16 @@ export default function SavedBooksScreen() {
     </View>
   );
 
+  // Group books by genre
+  const genreMap: { [genre: string]: any[] } = {};
+  books.forEach((book) => {
+    (book.genres || []).forEach((genre: string) => {
+      if (!genreMap[genre]) genreMap[genre] = [];
+      genreMap[genre].push(book);
+    });
+  });
+  const genreList = Object.keys(genreMap);
+
   // Skeleton loader for loading state
   const renderLoader = () => (
     <View style={styles.grid}>
@@ -520,16 +530,36 @@ export default function SavedBooksScreen() {
         </View>
       ) : (
         <FlatList
-          data={books}
-          renderItem={renderBook}
-          keyExtractor={(item) => item.id?.toString() ?? item.title}
-          contentContainerStyle={styles.grid}
-          numColumns={2}
-          accessibilityLabel="Saved books list"
+          data={genreList}
+          keyExtractor={(genre) => genre}
+          contentContainerStyle={{ paddingBottom: 24 }}
+          renderItem={({ item: genre }) => (
+            <View style={{ marginBottom: 18 }}>
+              <Text
+                style={{
+                  fontSize: 18,
+                  fontWeight: "bold",
+                  color: "#4f8cff",
+                  marginLeft: 12,
+                  marginBottom: 8,
+                }}
+              >
+                {genre}
+              </Text>
+              <FlatList
+                data={genreMap[genre]}
+                horizontal
+                keyExtractor={(book) => book.id?.toString() ?? book.title}
+                renderItem={renderBook}
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ paddingLeft: 8, paddingRight: 8 }}
+              />
+            </View>
+          )}
         />
       )}
       <Snackbar />
     </View>
-  );
+);
   // ...existing code...
 }
