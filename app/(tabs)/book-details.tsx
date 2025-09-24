@@ -1,7 +1,6 @@
 import { useLocalSearchParams } from "expo-router";
 import React from "react";
 import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
-
 export default function BookDetailsScreen() {
   const params = useLocalSearchParams();
   const book = params.book ? JSON.parse(params.book as string) : null;

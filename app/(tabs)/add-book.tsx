@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import { Image, ScrollView, View } from "react-native";
 import { Appbar, Button, Chip, Menu, TextInput } from "react-native-paper";
 import { addBook, initDatabase } from "../../hooks/useDatabase";
-
 export default function AddBookScreen() {
   const [image, setImage] = useState<string | null>(null);
   const [description, setDescription] = useState("");
@@ -57,11 +56,8 @@ export default function AddBookScreen() {
   };
 
   return (
-    <ScrollView>
-      <Appbar.Header>
-        <Appbar.Content title="Add Book" />
-      </Appbar.Header>
-      <View style={{ flex: 1, alignItems: "center", padding: 16 }}>
+    <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: "center", alignItems: "center", padding: 16 }}>
+      <View style={{ width: "100%", maxWidth: 400 }}>
         <Button
           mode="contained"
           onPress={handleTakePhoto}

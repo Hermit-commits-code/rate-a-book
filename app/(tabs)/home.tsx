@@ -1,7 +1,6 @@
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { Appbar } from "react-native-paper";
 import { getBooks, initDatabase } from "../../hooks/useDatabase";
 
 export default function HomeScreen() {
@@ -35,16 +34,13 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.screen}>
-      <Appbar.Header style={{ backgroundColor: "#4f8cff" }}>
-        <Appbar.Content title="Home" color="#fff" />
-      </Appbar.Header>
       <View style={styles.header}>
         <Image
           source={require("../../assets/images/icon.png")}
           style={styles.icon}
         />
         <Text style={styles.title}>Rate-a-Book</Text>
-        <Text style={styles.subtitle}>Your personal book tracker</Text>
+        <Text style={styles.subtitle}>Snap. Rate. Remember.</Text>
       </View>
       <View style={styles.statsRow}>
         <View style={styles.statCard}>
@@ -116,6 +112,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#e0eaff",
     marginBottom: 0,
+    textAlign: "center",
+    alignSelf: "center",
+    maxWidth: 300,
+    flexWrap: "wrap",
   },
   statsRow: {
     flexDirection: "row",

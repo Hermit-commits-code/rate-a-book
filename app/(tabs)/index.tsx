@@ -9,7 +9,6 @@ import {
   View,
 } from "react-native";
 import { getBooks, initDatabase } from "../../hooks/useDatabase";
-
 export default function SavedBooksScreen() {
   const [books, setBooks] = useState<any[]>([]);
   const router = useRouter();
