@@ -1,9 +1,11 @@
+import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Image, Pressable, ScrollView, StyleSheet, Text } from "react-native";
 import { getBooks, initDatabase } from "../../hooks/useDatabase";
 
 export default function SavedBooksScreen() {
   const [books, setBooks] = useState<any[]>([]);
+  const router = useRouter();
 
   useEffect(() => {
     (async () => {
@@ -13,6 +15,13 @@ export default function SavedBooksScreen() {
     })();
   }, []);
 
+  const handleBookPress = (book: any) => {
+    router.push({
+      pathname: "/book-details",
+      params: { book: JSON.stringify(book) },
+    });
+  };
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Saved Books</Text>
@@ -20,15 +29,21 @@ export default function SavedBooksScreen() {
         <Text style={styles.empty}>No books saved yet.</Text>
       ) : (
         books.map((book) => (
-          <View key={book.id} style={styles.bookCard}>
+          <Pressable
+            key={book.id}
+            style={styles.bookCard}
+            onPress={() => handleBookPress(book)}
+            accessible
+            accessibilityLabel={`Book card: ${book.description}`}
+          >
             {book.photo ? (
-              <Image source={{ uri: book.photo }} style={styles.bookImage} />
+              <Image source={{ uri: book.photo }} style={styles.bookImage} accessibilityLabel="Book cover photo" />
             ) : null}
             <Text style={styles.bookDesc}>{book.description}</Text>
             <Text style={styles.bookMeta}>Rating: {book.rating}</Text>
             <Text style={styles.bookMeta}>Category: {book.category}</Text>
             <Text style={styles.bookMeta}>Tags: {book.tags?.join(", ")}</Text>
-          </View>
+          </Pressable>
         ))
       )}
     </ScrollView>
@@ -38,6 +53,9 @@ export default function SavedBooksScreen() {
 const styles = StyleSheet.create({
   container: {
     padding: 16,
+    alignItems: "center",
+    backgroundColor: "#fafafa",
+    minHeight: "100%",
   },
   title: {
     fontSize: 24,
@@ -52,24 +70,33 @@ const styles = StyleSheet.create({
     marginTop: 32,
   },
   bookCard: {
-    backgroundColor: "#f5f5f5",
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 16,
-    elevation: 2,
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    width: "100%",
+    maxWidth: 400,
+    marginBottom: 20,
   },
   bookImage: {
     width: "100%",
     height: 200,
     borderRadius: 8,
-    marginBottom: 8,
+    marginBottom: 16,
+    backgroundColor: "#eee",
   },
   bookDesc: {
     fontSize: 16,
-    marginBottom: 4,
+    marginBottom: 8,
+    color: "#444",
   },
   bookMeta: {
     fontSize: 14,
     color: "#555",
+    marginBottom: 4,
   },
 });
