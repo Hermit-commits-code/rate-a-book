@@ -43,6 +43,7 @@ export default function AddBookScreen() {
         rating: rating ?? 0,
         tags,
         category,
+        genres: category ? [category] : [],
       },
       () => {
         alert("Book saved!");

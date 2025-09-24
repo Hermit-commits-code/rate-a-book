@@ -76,6 +76,9 @@ export default function SearchScreen() {
                   : [...prev, tag]
               )
             }
+            accessibilityLabel={`Tag: ${tag}`}
+            accessibilityRole="button"
+            accessibilityHint={`Toggle tag ${tag}`}
           >
             <Text style={styles.filterChipText}>{tag}</Text>
           </TouchableOpacity>
@@ -92,6 +95,9 @@ export default function SearchScreen() {
             onPress={() =>
               setSelectedRating(selectedRating === num ? null : num)
             }
+            accessibilityLabel={`Rating: ${num} stars`}
+            accessibilityRole="button"
+            accessibilityHint={`Filter books by ${num} star rating`}
           >
             <Text style={styles.filterChipText}>{"★".repeat(num)}</Text>
           </TouchableOpacity>
@@ -117,15 +123,22 @@ export default function SearchScreen() {
                 <Text style={styles.bookImagePlaceholderText}>No Photo</Text>
               </View>
             )}
-            <Text style={styles.bookDesc}>{item.description}</Text>
-            <Text style={styles.bookMeta}>
+            <Text style={styles.bookDesc} allowFontScaling={true}>
+              {item.description}
+            </Text>
+
+            <Text style={styles.bookMeta} allowFontScaling={true}>
               Rating: {"★".repeat(item.rating)}
             </Text>
-            <Text style={styles.bookMeta}>Category: {item.category}</Text>
+            <Text style={styles.bookMeta} allowFontScaling={true}>
+              Category: {item.category}
+            </Text>
             <View style={styles.tagRow}>
               {item.tags?.map((tag: string) => (
                 <View key={tag} style={styles.tagChip}>
-                  <Text style={styles.tagChipText}>{tag}</Text>
+                  <Text style={styles.tagChipText} allowFontScaling={true}>
+                    {tag}
+                  </Text>
                 </View>
               ))}
             </View>
@@ -135,7 +148,9 @@ export default function SearchScreen() {
         numColumns={2}
         contentContainerStyle={styles.grid}
         ListEmptyComponent={
-          <Text style={styles.emptyText}>No results found.</Text>
+          <Text style={styles.emptyText} allowFontScaling={true}>
+            No results found.
+          </Text>
         }
       />
     </View>
