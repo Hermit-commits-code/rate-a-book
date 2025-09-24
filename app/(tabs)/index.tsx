@@ -1,6 +1,8 @@
+// removed duplicate React import
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   FlatList,
   Image,
@@ -27,6 +29,15 @@ export default function SavedBooksScreen() {
     })();
   }, []);
 
+  useFocusEffect(
+    useCallback(() => {
+      (async () => {
+        const allBooks = await getBooks();
+        setBooks(allBooks);
+      })();
+    }, [])
+  );
+
   const handleBookPress = (book: any) => {
     router.push({
       pathname: "/book-details",
@@ -42,7 +53,7 @@ export default function SavedBooksScreen() {
           <Image
             source={{ uri: item.photo || item.image }}
             style={styles.modernBookImage}
-            resizeMode="cover"
+            resizeMode="contain"
             accessibilityLabel={`Cover image for ${item.title}`}
           />
         ) : (
@@ -55,8 +66,24 @@ export default function SavedBooksScreen() {
             <Text style={styles.favoriteBadgeText}>★</Text>
           </View>
         )}
-        {/* Quick Actions: Edit, Delete, Details */}
-        <View style={styles.quickActionsRow}>
+      </View>
+      <View style={styles.cardContentStack}>
+        <Text style={styles.modernBookAuthor} numberOfLines={1}>
+          {item.author}
+        </Text>
+        <Text style={styles.modernBookDesc} numberOfLines={2}>
+          {item.title}
+        </Text>
+        <Text style={styles.modernBookStatus}>{item.status ?? ""}</Text>
+        {/* Modern quick actions row at the bottom */}
+        <View
+          style={{
+            flexDirection: "row",
+            gap: 12,
+            justifyContent: "center",
+            marginTop: 16,
+          }}
+        >
           <Pressable
             style={styles.quickActionBtn}
             onPress={() =>
@@ -67,8 +94,9 @@ export default function SavedBooksScreen() {
           >
             <MaterialCommunityIcons
               name="pencil"
-              size={20}
-              style={styles.quickActionIcon}
+              size={28}
+              color="#4f8cff"
+              style={{ opacity: 0.92 }}
             />
           </Pressable>
           <Pressable
@@ -85,8 +113,9 @@ export default function SavedBooksScreen() {
           >
             <MaterialCommunityIcons
               name="trash-can"
-              size={20}
-              style={styles.quickActionIcon}
+              size={28}
+              color="#e53935"
+              style={{ opacity: 0.92 }}
             />
           </Pressable>
           <Pressable
@@ -97,31 +126,11 @@ export default function SavedBooksScreen() {
           >
             <MaterialCommunityIcons
               name="information"
-              size={20}
-              style={styles.quickActionIcon}
+              size={28}
+              color="#333"
+              style={{ opacity: 0.92 }}
             />
           </Pressable>
-        </View>
-      </View>
-      <View style={styles.cardContentStack}>
-        <Text style={styles.modernBookAuthor} numberOfLines={1}>
-          {item.author}
-        </Text>
-        <Text style={styles.modernBookDesc} numberOfLines={2}>
-          {item.title}
-        </Text>
-        <View style={styles.ratingRow}>
-          <Text style={styles.modernBookMeta}>
-            {item.rating ? "★".repeat(item.rating) : "N/A"}
-          </Text>
-          <Text style={styles.modernBookStatus}>{item.status ?? ""}</Text>
-        </View>
-        <View style={styles.modernTagRow}>
-          {item.tags?.map((tag: string) => (
-            <View key={tag} style={styles.modernTagChip}>
-              <Text style={styles.modernTagChipText}>{tag}</Text>
-            </View>
-          ))}
         </View>
       </View>
     </View>
@@ -251,8 +260,8 @@ export default function SavedBooksScreen() {
     modernBookCard: {
       backgroundColor: "#fff",
       borderRadius: 16,
-      padding: 16,
-      margin: 8,
+      padding: 10,
+      margin: 6,
       flex: 1,
       elevation: 4,
       shadowColor: "#000",
@@ -264,16 +273,16 @@ export default function SavedBooksScreen() {
     },
     modernBookImage: {
       width: "100%",
-      height: 200,
+      aspectRatio: 2 / 3,
       borderRadius: 10,
-      marginBottom: 12,
+      marginBottom: 6,
       backgroundColor: "#e3e3e3",
     },
     modernBookImagePlaceholder: {
       width: "100%",
-      height: 200,
+      height: 250,
       borderRadius: 10,
-      marginBottom: 12,
+      marginBottom: 6,
       backgroundColor: "#e3e3e3",
       alignItems: "center",
       justifyContent: "center",
@@ -560,6 +569,6 @@ export default function SavedBooksScreen() {
       )}
       <Snackbar />
     </View>
-);
+  );
   // ...existing code...
 }
