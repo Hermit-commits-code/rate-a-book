@@ -71,14 +71,7 @@ export default function SavedBooksScreen() {
 
   return (
     <View style={styles.screen}>
-      <View style={styles.header}>
-        <Image
-          source={require("../../assets/images/icon.png")}
-          style={styles.headerIcon}
-        />
-        <Text style={styles.headerTitle}>Rate-a-Book</Text>
-        <Text style={styles.headerSubtitle}>Your personal book tracker</Text>
-      </View>
+      <View style={styles.thinHeader} />
       {books.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Image
@@ -109,37 +102,23 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#f5f7fa",
   },
-  header: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingTop: 48,
-    paddingBottom: 32,
+  // header styles removed
+  thinHeader: {
+    height: 32,
     backgroundColor: "#4f8cff",
-    borderBottomLeftRadius: 32,
-    borderBottomRightRadius: 32,
+    width: "100%",
+    borderBottomLeftRadius: 16,
+    borderBottomRightRadius: 16,
     marginBottom: 8,
-    elevation: 4,
-  },
-  headerIcon: {
-    width: 64,
-    height: 64,
-    marginBottom: 8,
-  },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "#fff",
-    marginBottom: 4,
-    letterSpacing: 1,
-  },
-  headerSubtitle: {
-    fontSize: 16,
-    color: "#e0eaff",
-    marginBottom: 0,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
   },
   grid: {
     paddingHorizontal: 12,
     paddingBottom: 24,
+    paddingTop: 12,
   },
   bookCard: {
     backgroundColor: "#fff",

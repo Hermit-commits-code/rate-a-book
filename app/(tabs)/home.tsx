@@ -40,7 +40,6 @@ export default function HomeScreen() {
           style={styles.icon}
         />
         <Text style={styles.title}>Rate-a-Book</Text>
-        <Text style={styles.subtitle}>Snap. Rate. Remember.</Text>
       </View>
       <View style={styles.statsRow}>
         <View style={styles.statCard}>
@@ -114,7 +113,7 @@ const styles = StyleSheet.create({
     marginBottom: 0,
     textAlign: "center",
     alignSelf: "center",
-    maxWidth: 300,
+    maxWidth: 400,
     flexWrap: "wrap",
   },
   statsRow: {
