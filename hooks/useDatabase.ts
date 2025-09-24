@@ -1,4 +1,52 @@
 import * as SQLite from "expo-sqlite";
+export async function updateBook(
+  book: {
+    id: number;
+    photo?: string;
+    description?: string;
+    rating?: number;
+    tags?: string[];
+    category?: string;
+    genres?: string[];
+    spicyLevel?: number;
+    author?: string;
+    title?: string;
+  },
+  callback?: () => void
+) {
+  if (!db) {
+    console.error("Database not initialized. Call initDatabase() first.");
+    return;
+  }
+  try {
+    await db.runAsync(
+      `UPDATE books SET
+        photo = COALESCE(?, photo),
+        description = COALESCE(?, description),
+        rating = COALESCE(?, rating),
+        tags = COALESCE(?, tags),
+        category = COALESCE(?, category),
+        genres = COALESCE(?, genres),
+        spicyLevel = COALESCE(?, spicyLevel),
+        author = COALESCE(?, author),
+        title = COALESCE(?, title)
+      WHERE id = ?;`,
+      book.photo ?? null,
+      book.description ?? null,
+      book.rating ?? null,
+      book.tags ? JSON.stringify(book.tags) : null,
+      book.category ?? null,
+      book.genres ? JSON.stringify(book.genres) : null,
+      book.spicyLevel ?? null,
+      book.author ?? null,
+      book.title ?? null,
+      book.id
+    );
+    if (callback) callback();
+  } catch (err) {
+    console.error("Error updating book:", err);
+  }
+}
 export async function deleteBook(bookId: number) {
   if (!db) {
     console.error("Database not initialized. Call initDatabase() first.");
@@ -46,18 +94,32 @@ export async function initDatabase() {
         rating INTEGER,
         tags TEXT,
         category TEXT,
-        genres TEXT
+        genres TEXT,
+        spicyLevel INTEGER
       );
     `);
-    // Migration: If genres column doesn't exist, add it
+    // Migration: If genres, spicyLevel, author, or title column doesn't exist, add them
     const columns = await db.getAllAsync("PRAGMA table_info(books);");
     const hasGenres = columns.some((col: any) => col.name === "genres");
     if (!hasGenres) {
       await db.execAsync("ALTER TABLE books ADD COLUMN genres TEXT;");
-      // Migrate existing books: set genres to [category] for each book
       await db.execAsync(
         "UPDATE books SET genres = json_array(category) WHERE category IS NOT NULL;"
       );
+    }
+    const hasSpicy = columns.some((col: any) => col.name === "spicyLevel");
+    if (!hasSpicy) {
+      await db.execAsync(
+        "ALTER TABLE books ADD COLUMN spicyLevel INTEGER DEFAULT 1;"
+      );
+    }
+    const hasAuthor = columns.some((col: any) => col.name === "author");
+    if (!hasAuthor) {
+      await db.execAsync("ALTER TABLE books ADD COLUMN author TEXT;");
+    }
+    const hasTitle = columns.some((col: any) => col.name === "title");
+    if (!hasTitle) {
+      await db.execAsync("ALTER TABLE books ADD COLUMN title TEXT;");
     }
   } catch (err) {
     console.error("Error initializing database:", err);
@@ -73,6 +135,7 @@ export async function addBook(
     tags: string[];
     category: string;
     genres: string[];
+    spicyLevel: number;
   },
   callback?: () => void
 ) {
@@ -82,7 +145,7 @@ export async function addBook(
   }
   try {
     await db.runAsync(
-      `INSERT INTO books (photo, description, rating, tags, category, genres) VALUES (?, ?, ?, ?, ?, ?);`,
+      `INSERT INTO books (photo, description, rating, tags, category, genres, spicyLevel) VALUES (?, ?, ?, ?, ?, ?, ?);`,
       book.photo,
       book.description,
       book.rating,
@@ -90,7 +153,8 @@ export async function addBook(
       book.category,
       JSON.stringify(
         book.genres && book.genres.length ? book.genres : [book.category]
-      )
+      ),
+      book.spicyLevel
     );
     if (callback) callback();
   } catch (err) {

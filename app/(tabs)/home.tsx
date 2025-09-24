@@ -1,6 +1,7 @@
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { HomeStats } from "../../components/HomeStats";
 import { getBooks, initDatabase } from "../../hooks/useDatabase";
 
 export default function HomeScreen() {
@@ -41,26 +42,11 @@ export default function HomeScreen() {
         />
         <Text style={styles.title}>Rate-a-Book</Text>
       </View>
-      <View style={styles.statsRow}>
-        <View style={styles.statCard}>
-          <Text style={styles.statLabel}>Books</Text>
-          <Text style={styles.statValue}>{totalBooks}</Text>
-        </View>
-        <View style={styles.statCard}>
-          <Text style={styles.statLabel}>Avg. Rating</Text>
-          <Text style={styles.statValue}>{avgRating}</Text>
-        </View>
-        <View style={styles.statCardWide}>
-          <Text style={styles.statLabel}>Top Tag</Text>
-          <Text
-            style={styles.topTagValue}
-            numberOfLines={2}
-            ellipsizeMode="tail"
-          >
-            {mostUsedTag}
-          </Text>
-        </View>
-      </View>
+      <HomeStats
+        totalBooks={totalBooks}
+        avgRating={avgRating}
+        mostUsedTag={mostUsedTag}
+      />
       <View style={styles.actionsRow}>
         <TouchableOpacity
           style={styles.actionBtn}
@@ -80,10 +66,6 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: "#f5f7fa",
-  },
   header: {
     alignItems: "center",
     justifyContent: "center",
@@ -116,64 +98,6 @@ const styles = StyleSheet.create({
     maxWidth: 400,
     flexWrap: "wrap",
   },
-  statsRow: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    alignItems: "center",
-    marginTop: 24,
-    marginBottom: 16,
-    paddingHorizontal: 12,
-  },
-  statCard: {
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    padding: 18,
-    alignItems: "center",
-    elevation: 2,
-    minWidth: 90,
-    marginHorizontal: 6,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  statCardWide: {
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    padding: 18,
-    alignItems: "center",
-    elevation: 2,
-    minWidth: 120,
-    maxWidth: 140,
-    marginHorizontal: 6,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    flex: 1.2,
-  },
-  statLabel: {
-    fontSize: 14,
-    color: "#888",
-    marginBottom: 4,
-    fontWeight: "600",
-    textAlign: "center",
-  },
-  statValue: {
-    fontSize: 22,
-    fontWeight: "bold",
-    color: "#333",
-    textAlign: "center",
-  },
-  topTagValue: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#333",
-    marginTop: 4,
-    textAlign: "center",
-    paddingHorizontal: 8,
-    flexWrap: "wrap",
-  },
   actionsRow: {
     flexDirection: "row",
     justifyContent: "center",
@@ -193,5 +117,9 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     letterSpacing: 1,
     textAlign: "center",
+  },
+  screen: {
+    flex: 1,
+    backgroundColor: "#f5f7fa",
   },
 });
