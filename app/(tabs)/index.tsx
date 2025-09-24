@@ -36,12 +36,7 @@ export default function SavedBooksScreen() {
 
   // Render a single book card
   const renderBook = ({ item }: { item: any }) => (
-    <Pressable
-      style={styles.modernBookCard}
-      onPress={() => handleBookPress(item)}
-      accessibilityLabel={`View details for ${item.title}`}
-      accessibilityRole="button"
-    >
+    <View style={styles.modernBookCard}>
       <View style={styles.bookImageWrapper}>
         {item.image ? (
           <Image
@@ -60,6 +55,53 @@ export default function SavedBooksScreen() {
             <Text style={styles.favoriteBadgeText}>★</Text>
           </View>
         )}
+        {/* Quick Actions: Edit, Delete, Details */}
+        <View style={styles.quickActionsRow}>
+          <Pressable
+            style={styles.quickActionBtn}
+            onPress={() =>
+              router.push({ pathname: "/add-book", params: { edit: item.id } })
+            }
+            accessibilityLabel={`Edit ${item.title}`}
+            accessibilityRole="button"
+          >
+            <MaterialCommunityIcons
+              name="pencil"
+              size={20}
+              style={styles.quickActionIcon}
+            />
+          </Pressable>
+          <Pressable
+            style={styles.quickActionBtn}
+            onPress={() => {
+              if (window.confirm(`Delete ${item.title}?`)) {
+                setUndoBook(item);
+                setBooks((prev) => prev.filter((b) => b.id !== item.id));
+                setShowSnackbar(true);
+              }
+            }}
+            accessibilityLabel={`Delete ${item.title}`}
+            accessibilityRole="button"
+          >
+            <MaterialCommunityIcons
+              name="trash-can"
+              size={20}
+              style={styles.quickActionIcon}
+            />
+          </Pressable>
+          <Pressable
+            style={styles.quickActionBtn}
+            onPress={() => handleBookPress(item)}
+            accessibilityLabel={`View details for ${item.title}`}
+            accessibilityRole="button"
+          >
+            <MaterialCommunityIcons
+              name="information"
+              size={20}
+              style={styles.quickActionIcon}
+            />
+          </Pressable>
+        </View>
       </View>
       <View style={styles.cardContentStack}>
         <Text style={styles.modernBookAuthor} numberOfLines={1}>
@@ -70,7 +112,7 @@ export default function SavedBooksScreen() {
         </Text>
         <View style={styles.ratingRow}>
           <Text style={styles.modernBookMeta}>
-            Rating: {item.rating ?? "N/A"}
+            {item.rating ? "★".repeat(item.rating) : "N/A"}
           </Text>
           <Text style={styles.modernBookStatus}>{item.status ?? ""}</Text>
         </View>
@@ -82,7 +124,7 @@ export default function SavedBooksScreen() {
           ))}
         </View>
       </View>
-    </Pressable>
+    </View>
   );
 
   // Skeleton loader for loading state
