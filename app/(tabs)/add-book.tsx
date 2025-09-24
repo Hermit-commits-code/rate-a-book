@@ -5,29 +5,28 @@ import { Appbar, Button, Chip, Menu, TextInput } from "react-native-paper";
 import { addBook, initDatabase } from "../../hooks/useDatabase";
 
 export default function AddBookScreen() {
-  // State for image picker
   const [image, setImage] = useState<string | null>(null);
-
-  // State for form fields
   const [description, setDescription] = useState("");
   const [rating, setRating] = useState<number | null>(null);
   const [tags, setTags] = useState<string[]>([]);
   const tagOptions = ["liked", "dislike", "want to own", "never read again"];
-
-  // Category dropdown
   const [category, setCategory] = useState("");
   const [menuVisible, setMenuVisible] = useState(false);
   const categories = ["Fiction", "Non-Fiction", "Sci-Fi", "Biography"];
 
-  // Image picker function
-  const pickImage = async () => {
-    const permissionResult =
-      await ImagePicker.requestMediaLibraryPermissionsAsync();
+  useEffect(() => {
+    (async () => {
+      await initDatabase();
+    })();
+  }, []);
+
+  const handleTakePhoto = async () => {
+    const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
     if (!permissionResult.granted) {
-      alert("Permission to access media library is required!");
+      alert("Permission to access camera is required!");
       return;
     }
-    const result = await ImagePicker.launchImageLibraryAsync({
+    const result = await ImagePicker.launchCameraAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       quality: 1,
@@ -36,11 +35,6 @@ export default function AddBookScreen() {
       setImage(result.assets[0].uri);
     }
   };
-  useEffect(() => {
-    (async () => {
-      await initDatabase();
-    })();
-  }, []);
 
   const handleSubmit = async () => {
     await addBook(
@@ -61,6 +55,7 @@ export default function AddBookScreen() {
       }
     );
   };
+
   return (
     <ScrollView>
       <Appbar.Header>
@@ -69,10 +64,10 @@ export default function AddBookScreen() {
       <View style={{ flex: 1, alignItems: "center", padding: 16 }}>
         <Button
           mode="contained"
-          onPress={pickImage}
+          onPress={handleTakePhoto}
           style={{ marginBottom: 16 }}
         >
-          Pick a Book Photo
+          Take Book Photo
         </Button>
         {image && (
           <Image
@@ -80,7 +75,6 @@ export default function AddBookScreen() {
             style={{ width: 200, height: 300, marginBottom: 16 }}
           />
         )}
-
         <TextInput
           label="Description"
           value={description}
@@ -88,7 +82,6 @@ export default function AddBookScreen() {
           multiline
           style={{ marginBottom: 16, width: "100%" }}
         />
-
         <View
           style={{
             flexDirection: "row",
@@ -107,7 +100,6 @@ export default function AddBookScreen() {
             </Button>
           ))}
         </View>
-
         <View
           style={{ flexDirection: "row", flexWrap: "wrap", marginBottom: 16 }}
         >
@@ -128,7 +120,6 @@ export default function AddBookScreen() {
             </Chip>
           ))}
         </View>
-
         <Menu
           visible={menuVisible}
           onDismiss={() => setMenuVisible(false)}

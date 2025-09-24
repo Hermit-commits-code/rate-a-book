@@ -1,4 +1,4 @@
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Image, Pressable, ScrollView, StyleSheet, Text } from "react-native";
 import { getBooks, initDatabase } from "../../hooks/useDatabase";
@@ -14,6 +14,15 @@ export default function SavedBooksScreen() {
       setBooks(allBooks);
     })();
   }, []);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      (async () => {
+        const allBooks = await getBooks();
+        setBooks(allBooks);
+      })();
+    }, [])
+  );
 
   const handleBookPress = (book: any) => {
     router.push({
@@ -37,7 +46,11 @@ export default function SavedBooksScreen() {
             accessibilityLabel={`Book card: ${book.description}`}
           >
             {book.photo ? (
-              <Image source={{ uri: book.photo }} style={styles.bookImage} accessibilityLabel="Book cover photo" />
+              <Image
+                source={{ uri: book.photo }}
+                style={styles.bookImage}
+                accessibilityLabel="Book cover photo"
+              />
             ) : null}
             <Text style={styles.bookDesc}>{book.description}</Text>
             <Text style={styles.bookMeta}>Rating: {book.rating}</Text>
