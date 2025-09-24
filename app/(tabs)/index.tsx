@@ -7,6 +7,8 @@ import {
   FlatList,
   Image,
   Pressable,
+  RefreshControl,
+  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -16,6 +18,7 @@ import { getBooks, initDatabase } from "../../hooks/useDatabase";
 export default function SavedBooksScreen() {
   const [books, setBooks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [undoBook, setUndoBook] = useState<any | null>(null);
   const [showSnackbar, setShowSnackbar] = useState(false);
   const router = useRouter();
@@ -28,6 +31,13 @@ export default function SavedBooksScreen() {
       setLoading(false);
     })();
   }, []);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    const allBooks = await getBooks();
+    setBooks(allBooks);
+    setRefreshing(false);
+  };
 
   useFocusEffect(
     useCallback(() => {
@@ -538,12 +548,15 @@ export default function SavedBooksScreen() {
           </Text>
         </View>
       ) : (
-        <FlatList
-          data={genreList}
-          keyExtractor={(genre) => genre}
+        <ScrollView
+          style={{ flex: 1 }}
           contentContainerStyle={{ paddingBottom: 24 }}
-          renderItem={({ item: genre }) => (
-            <View style={{ marginBottom: 18 }}>
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+        >
+          {genreList.map((genre) => (
+            <View key={genre} style={{ marginBottom: 18 }}>
               <Text
                 style={{
                   fontSize: 18,
@@ -564,8 +577,8 @@ export default function SavedBooksScreen() {
                 contentContainerStyle={{ paddingLeft: 8, paddingRight: 8 }}
               />
             </View>
-          )}
-        />
+          ))}
+        </ScrollView>
       )}
       <Snackbar />
     </View>
