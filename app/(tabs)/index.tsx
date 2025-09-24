@@ -1,9 +1,23 @@
 // removed duplicate React import
+import {
+  addBook,
+  deleteBook,
+  getBooks,
+  initDatabase,
+} from "@/hooks/useDatabase";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import React, {
+  ReactNode,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import {
+  Alert,
+  Animated,
   FlatList,
   Image,
   Pressable,
@@ -13,7 +27,84 @@ import {
   Text,
   View,
 } from "react-native";
-import { getBooks, initDatabase } from "../../hooks/useDatabase";
+
+// AnimatedPressable: scale animation on press
+import type { AccessibilityRole } from "react-native";
+interface AnimatedPressableProps {
+  children: ReactNode;
+  style?: any;
+  onPress?: () => void;
+  accessibilityLabel?: string;
+  accessibilityRole?: AccessibilityRole;
+}
+function AnimatedPressable({
+  children,
+  style,
+  onPress,
+  accessibilityLabel,
+  accessibilityRole,
+}: AnimatedPressableProps) {
+  const scale = useRef(new Animated.Value(1)).current;
+  const rippleOpacity = useRef(new Animated.Value(0)).current;
+
+  const handlePressIn = () => {
+    Animated.parallel([
+      Animated.spring(scale, {
+        toValue: 0.92,
+        useNativeDriver: true,
+        speed: 40,
+        bounciness: 4,
+      }),
+      Animated.timing(rippleOpacity, {
+        toValue: 0.18,
+        duration: 120,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  };
+  const handlePressOut = () => {
+    Animated.parallel([
+      Animated.spring(scale, {
+        toValue: 1,
+        useNativeDriver: true,
+        speed: 40,
+        bounciness: 4,
+      }),
+      Animated.timing(rippleOpacity, {
+        toValue: 0,
+        duration: 180,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  };
+  return (
+    <Animated.View style={[{ transform: [{ scale }] }, style]}>
+      <Pressable
+        onPress={onPress}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        accessibilityLabel={accessibilityLabel}
+        accessibilityRole={accessibilityRole}
+        style={{ position: "relative" }}
+      >
+        {children}
+        <Animated.View
+          pointerEvents="none"
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            borderRadius: 12,
+            backgroundColor: "#4f8cff",
+            opacity: rippleOpacity,
+          }}
+        />
+      </Pressable>
+    </Animated.View>
+  );
+}
 
 export default function SavedBooksScreen() {
   const [books, setBooks] = useState<any[]>([]);
@@ -41,6 +132,9 @@ export default function SavedBooksScreen() {
 
   useFocusEffect(
     useCallback(() => {
+      // Reset undo snackbar/book state on tab focus
+      setShowSnackbar(false);
+      setUndoBook(null);
       (async () => {
         const allBooks = await getBooks();
         setBooks(allBooks);
@@ -94,7 +188,7 @@ export default function SavedBooksScreen() {
             marginTop: 16,
           }}
         >
-          <Pressable
+          <AnimatedPressable
             style={styles.quickActionBtn}
             onPress={() =>
               router.push({ pathname: "/add-book", params: { edit: item.id } })
@@ -108,15 +202,24 @@ export default function SavedBooksScreen() {
               color="#4f8cff"
               style={{ opacity: 0.92 }}
             />
-          </Pressable>
-          <Pressable
+          </AnimatedPressable>
+          <AnimatedPressable
             style={styles.quickActionBtn}
             onPress={() => {
-              if (window.confirm(`Delete ${item.title}?`)) {
-                setUndoBook(item);
-                setBooks((prev) => prev.filter((b) => b.id !== item.id));
-                setShowSnackbar(true);
-              }
+              Alert.alert("Delete Book", `Delete ${item.title}?`, [
+                { text: "Cancel", style: "cancel" },
+                {
+                  text: "Delete",
+                  style: "destructive",
+                  onPress: async () => {
+                    setUndoBook(item);
+                    setBooks((prev) => prev.filter((b) => b.id !== item.id));
+                    setShowSnackbar(true);
+                    // Remove from database
+                    await deleteBook(item.id);
+                  },
+                },
+              ]);
             }}
             accessibilityLabel={`Delete ${item.title}`}
             accessibilityRole="button"
@@ -127,8 +230,8 @@ export default function SavedBooksScreen() {
               color="#e53935"
               style={{ opacity: 0.92 }}
             />
-          </Pressable>
-          <Pressable
+          </AnimatedPressable>
+          <AnimatedPressable
             style={styles.quickActionBtn}
             onPress={() => handleBookPress(item)}
             accessibilityLabel={`View details for ${item.title}`}
@@ -140,7 +243,7 @@ export default function SavedBooksScreen() {
               color="#333"
               style={{ opacity: 0.92 }}
             />
-          </Pressable>
+          </AnimatedPressable>
         </View>
       </View>
     </View>
@@ -189,8 +292,12 @@ export default function SavedBooksScreen() {
       <View style={styles.snackbar} accessibilityLiveRegion="polite">
         <Text style={styles.snackbarText}>Book deleted</Text>
         <Pressable
-          onPress={() => {
-            if (undoBook) setBooks((prev) => [undoBook, ...prev]);
+          onPress={async () => {
+            if (undoBook) {
+              setBooks((prev) => [undoBook, ...prev]);
+              // Re-add to database
+              await addBook(undoBook);
+            }
             setUndoBook(null);
             setShowSnackbar(false);
           }}
