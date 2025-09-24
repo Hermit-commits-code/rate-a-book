@@ -1,4 +1,5 @@
 // ...existing styles...
+import Fuse from "fuse.js";
 import React, { useEffect, useState } from "react";
 import {
   FlatList,
@@ -38,13 +39,15 @@ export default function SearchScreen() {
 
   useEffect(() => {
     let results = books;
+    // Advanced fuzzy, multi-field search
     if (search.trim()) {
-      const q = search.trim().toLowerCase();
-      results = results.filter(
-        (b) =>
-          (b.description && b.description.toLowerCase().includes(q)) ||
-          (b.category && b.category.toLowerCase().includes(q))
-      );
+      const fuse = new Fuse(books, {
+        keys: ["title", "author", "description", "category", "tags"],
+        threshold: 0.35,
+        ignoreLocation: true,
+        minMatchCharLength: 2,
+      });
+      results = fuse.search(search.trim()).map((r) => r.item);
     }
     if (selectedTags.length > 0) {
       results = results.filter((b) =>
@@ -70,7 +73,7 @@ export default function SearchScreen() {
   };
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: "#f0f4fa" }}>
       {/* Edit Book Modal */}
       {editModalVisible && editBook && (
         <View style={styles.modalOverlay}>
@@ -81,6 +84,8 @@ export default function SearchScreen() {
               value={editBook.title || ""}
               onChangeText={(text) => setEditBook({ ...editBook, title: text })}
               style={styles.modalInput}
+              placeholder="Book Title"
+              placeholderTextColor="#bbb"
             />
             <Text style={styles.modalLabel}>Author</Text>
             <TextInput
@@ -89,13 +94,17 @@ export default function SearchScreen() {
                 setEditBook({ ...editBook, author: text })
               }
               style={styles.modalInput}
+              placeholder="Book Author"
+              placeholderTextColor="#bbb"
             />
             <View style={styles.modalActions}>
               <TouchableOpacity
-                style={styles.modalBtn}
+                style={[styles.modalBtn, { backgroundColor: "#e0eaff" }]}
                 onPress={() => setEditModalVisible(false)}
               >
-                <Text style={styles.modalBtnText}>Cancel</Text>
+                <Text style={[styles.modalBtnText, { color: "#4f8cff" }]}>
+                  Cancel
+                </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.modalBtn}
@@ -109,14 +118,37 @@ export default function SearchScreen() {
       )}
       <View style={styles.screen}>
         <View style={styles.thinHeader} />
-        <View style={styles.searchBarRow}>
+        <Text
+          style={{
+            fontSize: 22,
+            fontWeight: "bold",
+            color: "#222",
+            marginTop: 18,
+            marginLeft: 18,
+            marginBottom: 6,
+          }}
+        >
+          Search & Filter
+        </Text>
+        <View style={[styles.searchBarRow, { marginBottom: 18 }]}>
           <TextInput
             style={styles.searchBar}
-            placeholder="Search by title or author..."
+            placeholder="Search by title, author, or description..."
             value={search}
             onChangeText={setSearch}
+            placeholderTextColor="#bbb"
           />
         </View>
+        <Text
+          style={{
+            fontWeight: "bold",
+            color: "#4f8cff",
+            marginLeft: 18,
+            marginBottom: 2,
+          }}
+        >
+          Tags
+        </Text>
         <View style={styles.filterRow}>
           {tagOptions.map((tag) => (
             <TouchableOpacity
@@ -140,6 +172,17 @@ export default function SearchScreen() {
             </TouchableOpacity>
           ))}
         </View>
+        <Text
+          style={{
+            fontWeight: "bold",
+            color: "#4f8cff",
+            marginLeft: 18,
+            marginTop: 8,
+            marginBottom: 2,
+          }}
+        >
+          Rating
+        </Text>
         <View style={styles.filterRow}>
           {ratingOptions.map((num) => (
             <TouchableOpacity
@@ -159,6 +202,17 @@ export default function SearchScreen() {
             </TouchableOpacity>
           ))}
         </View>
+        <Text
+          style={{
+            fontWeight: "bold",
+            color: "#4f8cff",
+            marginLeft: 18,
+            marginTop: 8,
+            marginBottom: 2,
+          }}
+        >
+          Spicy Level
+        </Text>
         <View style={styles.filterRow}>
           {spicyOptions.map((level) => (
             <TouchableOpacity
@@ -178,7 +232,20 @@ export default function SearchScreen() {
             </TouchableOpacity>
           ))}
         </View>
+        <Text
+          style={{
+            fontWeight: "bold",
+            color: "#222",
+            marginLeft: 18,
+            marginTop: 18,
+            marginBottom: 6,
+            fontSize: 18,
+          }}
+        >
+          Results
+        </Text>
         <FlatList
+          contentContainerStyle={{ paddingBottom: 32 }}
           data={filteredBooks}
           renderItem={({ item }) => (
             <Pressable
@@ -310,24 +377,41 @@ const styles = StyleSheet.create({
   filterRow: {
     flexDirection: "row",
     flexWrap: "wrap",
-    paddingHorizontal: 16,
-    marginBottom: 8,
+    gap: 8,
+    paddingHorizontal: 12,
+    marginBottom: 10,
+    justifyContent: "flex-start",
   },
   filterChip: {
     backgroundColor: "#e0eaff",
-    borderRadius: 16,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    marginRight: 8,
-    marginBottom: 6,
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    marginRight: 0,
+    marginBottom: 0,
+    marginTop: 4,
+    marginLeft: 0,
+    minWidth: 60,
+    alignItems: "center",
+    justifyContent: "center",
+    elevation: 1,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 2,
   },
   filterChipSelected: {
     backgroundColor: "#4f8cff",
+    borderWidth: 2,
+    borderColor: "#1a5cff",
+    elevation: 2,
+    shadowOpacity: 0.12,
   },
   filterChipText: {
     color: "#333",
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: "bold",
+    letterSpacing: 0.2,
   },
   grid: {
     paddingHorizontal: 12,
